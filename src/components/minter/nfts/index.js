@@ -6,7 +6,7 @@ import AddNfts from "./Add";
 import Nft from "./Card";
 import Loader from "../../ui/Loader";
 import { NotificationSuccess, NotificationError } from "../../ui/Notifications";
-import { getNfts, createNft, purchaseItem } from "../../../utils/minter";
+import { getNfts, createNft, buyNFT } from "../../../utils/minter";
 import { Row } from "react-bootstrap";
 
 const NftList = ({ minterContract, marketplaceContract, name }) => {
@@ -57,7 +57,7 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
     try {
       setLoading(true);
 
-      await purchaseItem(
+      await buyNFT(
         minterContract,
         marketplaceContract,
         performActions,
@@ -99,7 +99,7 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
               {nfts.map((_nft) => (
                 <Nft
                   key={_nft.index}
-                  purchaseItem={() => buy(_nft.index, _nft.tokenId)}
+                  buyNFT={() => buy(_nft.index, _nft.tokenId)}
                   nft={{
                     ..._nft,
                   }}

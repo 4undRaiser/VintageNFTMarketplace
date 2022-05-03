@@ -10,17 +10,16 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract MyNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
-      Counters.Counter private _tokenIDs;
+      uint256 public tokenID;
 
     constructor() ERC721("VintageArtifactMarketplace", "VNFT") {}
 
 //    mint an NFT
-    function createNFT(string calldata _tokenURI) public returns (uint256)  {
-      _tokenIDs.increment();
-      uint256 currentID = _tokenIDs.current();
-      _safeMint(msg.sender, currentID);
-      _setTokenURI(currentID, _tokenURI);
-      return(currentID);
+    function createNFT(string memory _tokenURI) public returns (uint256)  {
+      tokenID++;
+      _safeMint(msg.sender, tokenID);
+      _setTokenURI(tokenID, _tokenURI);
+      return(tokenID);
   }
     // The following functions are overrides required by Solidity.
 

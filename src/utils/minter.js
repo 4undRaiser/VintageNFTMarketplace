@@ -39,9 +39,7 @@ export const createNft = async (
         .createNFT(url)
         .send({ from: defaultAccount });
 
-      let tokenCount = BigNumber.from(
-        transaction.events.Transfer.returnValues.tokenId
-      );
+      let tokenCount = BigNumber.from(transaction.events.Transfer.returnValues.tokenId);
 
       const NFTprice = ethers.utils.parseUnits(String(price), "ether");
       console.log(NFTprice);
@@ -80,7 +78,6 @@ export const getNfts = async (minterContract, marketplaceContract) => {
   try {
     const nfts = [];
     const nftsLength = await marketplaceContract.methods.getListinglength().call();
-
     // contract starts minting from index 1
     for (let i = 1; i <= Number(nftsLength); i++) {
       const nft = new Promise(async (resolve) => {
@@ -95,6 +92,7 @@ export const getNfts = async (minterContract, marketplaceContract) => {
           price: listing.price,
           seller: listing.seller,
           sold: listing.sold,
+          tokenId: listing.tokenId,
           name: meta.data.name,
           image: meta.data.image,
           description: meta.data.description,
@@ -139,7 +137,8 @@ export const fetchNftContractOwner = async (minterContract) => {
   }
 };
 
-export const purchaseItem = async (
+export const buyNFT = async (
+  minterContract,
   marketplaceContract,
   performActions,
   index,
@@ -152,7 +151,7 @@ export const purchaseItem = async (
         const { defaultAccount } = kit;
         const listing = await marketplaceContract.methods.getNFTListing(index).call();
         await marketplaceContract.methods
-          .purchaseItem(index)
+          .buyNFT(index)
           .send({ from: defaultAccount, value: listing.price });
       } catch (error) {
         console.log({ error });
@@ -162,3 +161,4 @@ export const purchaseItem = async (
     console.log(error);
   }
 };
+  
