@@ -38,18 +38,18 @@ struct NFTListing {
        false, 
        _tokenId
        );
+  
   }
 
   function buyNFT(uint256 _tokenId) external payable {
-     NFTListing storage listing = _listings[_tokenId];
-      require(!listing.sold, "item is already sold");
-     require(listing.price > 0, "NFTMarket: nft not listed for sale");
-     require(msg.value >= listing.price, "NFTMarket: incorrect price");
-     payable(listing.seller).transfer(listing.price);
-      listing.sold = true;
-     ERC721(address(this)).transferFrom(address(this), msg.sender, listing.tokenId);
-     
-  }
+        NFTListing storage listing = _listings[_tokenId];
+        require(_tokenId > 0 && _tokenId <= listingLength, "item doesn't exist");
+        require(msg.value >= listing.price,"not enough balance for this transaction");
+        require(!listing.sold, "item is sold already");
+        payable(listing.seller).transfer(listing.price);
+        listing.sold = true;
+        listing.nft.transferFrom(address(this), msg.sender, listing.tokenId);
+    }
 
 
     function getNFTListing(uint256 _tokenId) public view returns (NFTListing memory) {
