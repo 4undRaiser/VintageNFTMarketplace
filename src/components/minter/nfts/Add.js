@@ -4,7 +4,7 @@ import { Button, Modal, Form, FloatingLabel } from "react-bootstrap";
 import { uploadToIpfs } from "../../../utils/minter";
 
 // basic attributes that can be added to NFT
-const COLORS = ["Red", "Green", "Blue", "Cyan", "Yellow", "Purple"];
+const COLORS = ["Red", "Green", "Blue", "Cyan", "Yellow", "Purple", "Black", "Multicolor"];
 const SHAPES = ["Circle", "Square", "Triangle"];
 
 const AddNfts = ({ save, address }) => {

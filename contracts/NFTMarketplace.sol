@@ -9,14 +9,10 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 
 
-
-
-
 contract NFTMarketplace {
-
+  
     using SafeMath for uint256;
     uint256 public listingLength = 0;
-
 
 struct NFTListing {  
   IERC721 nft;
@@ -27,25 +23,32 @@ struct NFTListing {
 }
   
  
-  mapping(uint256 => NFTListing) private _listings;
+  mapping(uint256 => NFTListing) public _listings;
 
   
 
-  function listNFT(IERC721 _nft,  uint256 _price, uint256 _tokenId) public {
+  function listNFT(IERC721 _nft,  uint256 _price, uint256 _tokenId) external {
     require(_price > 0, "NFTMarket: price must be greater than 0");
       listingLength ++;
     _nft.transferFrom(msg.sender, address(this), _tokenId);
-    _listings[listingLength] = NFTListing(_nft, _price, msg.sender, false, _tokenId);
+    _listings[listingLength] = NFTListing(
+      _nft,
+       _price,
+       payable(msg.sender), 
+       false, 
+       _tokenId
+       );
   }
 
   function buyNFT(uint256 _tokenId) external payable {
      NFTListing storage listing = _listings[_tokenId];
       require(!listing.sold, "item is already sold");
      require(listing.price > 0, "NFTMarket: nft not listed for sale");
-     require(msg.value == listing.price, "NFTMarket: incorrect price");
-     ERC721(address(this)).transferFrom(address(this), msg.sender, listing.tokenId);
+     require(msg.value >= listing.price, "NFTMarket: incorrect price");
      payable(listing.seller).transfer(listing.price);
       listing.sold = true;
+     ERC721(address(this)).transferFrom(address(this), msg.sender, listing.tokenId);
+     
   }
 
 

@@ -49,7 +49,7 @@ export const createNft = async (
         .send({ from: kit.defaultAccount });
 
       await marketplaceContract.methods
-        .listNFT(MyNFTContractAddress.MyNFT, tokenCount, NFTprice)
+        .listNFT(MyNFTContractAddress.MyNFT, NFTprice, tokenCount)
         .send({ from: defaultAccount });
 
       return transaction;
