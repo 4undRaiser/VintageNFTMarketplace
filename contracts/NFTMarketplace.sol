@@ -26,7 +26,7 @@ struct NFTListing {
   mapping(uint256 => NFTListing) public _listings;
 
   
-
+// this function will list an artifact into the marketplace
   function listNFT(IERC721 _nft,  uint256 _price, uint256 _tokenId) external {
     require(_price > 0, "NFTMarket: price must be greater than 0");
       listingLength ++;
@@ -40,18 +40,35 @@ struct NFTListing {
        );
   }
 
-  function buyNFT(uint256 _tokenId) external payable {
-     NFTListing storage listing = _listings[_tokenId];
-      require(!listing.sold, "item is already sold");
+
+//this function will cancel the listing. it also has checks to make sure only the owner of the listing can cancel the listing from the market place
+function cancelListing(uint256 tokenId) public {
+     NFTListing memory listing = _listings[tokenId];
      require(listing.price > 0, "NFTMarket: nft not listed for sale");
-     require(msg.value >= listing.price, "NFTMarket: incorrect price");
-     payable(listing.seller).transfer(listing.price);
-      listing.sold = true;
-     ERC721(address(this)).transferFrom(address(this), msg.sender, listing.tokenId);
-     
+     require(listing.seller == msg.sender, "NFTMarket: you're not the seller");
+     ERC721(address(this)).transferFrom(address(this), msg.sender, tokenId);
+     clearListing(tokenId);
+  }
+// this function will clear the listing by setting the price to zero and the owner address to address(0)
+  function clearListing(uint256 tokenID) private {
+    _listings[tokenID].price = 0;
+    _listings[tokenID].seller= address(0);
   }
 
 
+
+// this function will facilitate the purchasing of a listing
+  function buyNFT(uint256 _tokenId) external payable {
+        NFTListing storage listing = _listings[_tokenId];
+        require(_tokenId > 0 && _tokenId <= listingLength, "item doesn't exist");
+        require(msg.value >= listing.price,"not enough balance for this transaction");
+        require(!listing.sold, "item is sold already");
+        payable(listing.seller).transfer(listing.price);
+        listing.sold = true;
+        listing.nft.transferFrom(address(this), msg.sender, listing.tokenId);
+    }
+
+// this function will get the listings in the market place
     function getNFTListing(uint256 _tokenId) public view returns (NFTListing memory) {
         return _listings[_tokenId];
     }
