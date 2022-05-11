@@ -10,22 +10,22 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 
 contract NFTMarketplace {
-  
+
     using SafeMath for uint256;
     uint256 public listingLength = 0;
 
-struct NFTListing {  
+struct NFTListing {
   IERC721 nft;
   uint256 price;
   address seller;
   bool sold;
   uint256 tokenId;
 }
-  
- 
+
+
   mapping(uint256 => NFTListing) public _listings;
 
-  
+
 // this function will list an artifact into the marketplace
   function listNFT(IERC721 _nft,  uint256 _price, uint256 _tokenId) external {
     require(_price > 0, "NFTMarket: price must be greater than 0");
@@ -34,8 +34,8 @@ struct NFTListing {
     _listings[listingLength] = NFTListing(
       _nft,
        _price,
-       payable(msg.sender), 
-       false, 
+       payable(msg.sender),
+       false,
        _tokenId
        );
   }
@@ -63,9 +63,13 @@ function cancelListing(uint256 tokenId) public {
         require(_tokenId > 0 && _tokenId <= listingLength, "item doesn't exist");
         require(msg.value >= listing.price,"not enough balance for this transaction");
         require(!listing.sold, "item is sold already");
+        require(listing.seller != msg.sender, "You cannot buy your own nft");
         payable(listing.seller).transfer(listing.price);
         listing.sold = true;
         listing.nft.transferFrom(address(this), msg.sender, listing.tokenId);
+
+        // set the buyer as the new owner
+        listing.seller = msg.sender;
     }
 
 // this function will get the listings in the market place
@@ -73,7 +77,7 @@ function cancelListing(uint256 tokenId) public {
         return _listings[_tokenId];
     }
 
-    
+
     // get list of items
     function getListinglength() public view returns (uint256) {
         return listingLength;
