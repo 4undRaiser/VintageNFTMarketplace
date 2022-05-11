@@ -12,7 +12,7 @@ export const createNft = async (
   minterContract,
   marketplaceContract,
   performActions,
-  { name, price, description, ipfsImage, ownerAddress, attributes }
+  { name, price, description, ipfsImage, attributes }
 ) => {
   await performActions(async (kit) => {
     if (!name || !description || !ipfsImage) return;
@@ -111,8 +111,8 @@ export const getNfts = async (minterContract, marketplaceContract) => {
 export const fetchNftMeta = async (ipfsUrl) => {
   try {
     if (!ipfsUrl) return null;
-    const meta = await axios.get(ipfsUrl);
-    return meta;
+    return  await axios.get(ipfsUrl);
+
   } catch (e) {
     console.log({ e });
   }
@@ -130,8 +130,8 @@ export const fetchNftOwner = async (minterContract, index) => {
 // get the address that deployed the NFT contract
 export const fetchNftContractOwner = async (minterContract) => {
   try {
-    let owner = await minterContract.methods.owner().call();
-    return owner;
+    return await minterContract.methods.owner().call();
+
   } catch (e) {
     console.log({ e });
   }
@@ -141,8 +141,7 @@ export const buyNFT = async (
   minterContract,
   marketplaceContract,
   performActions,
-  index,
-  tokenId
+  index
 ) => {
   try {
     await performActions(async (kit) => {
@@ -161,4 +160,3 @@ export const buyNFT = async (
     console.log(error);
   }
 };
-  

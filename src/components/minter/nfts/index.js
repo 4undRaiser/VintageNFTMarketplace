@@ -18,18 +18,21 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
   const [loading, setLoading] = useState(false);
 
   const getAssets = useCallback(async () => {
-    try {
-      setLoading(true);
+    if(marketplaceContract && minterContract){
+      try {
+        setLoading(true);
 
-      // fetch all nfts from the smart contract
-      const allNfts = await getNfts(minterContract, marketplaceContract);
-      if (!allNfts) return;
-      setNfts(allNfts);
-    } catch (error) {
-      console.log({ error });
-    } finally {
-      setLoading(false);
+        // fetch all nfts from the smart contract
+        const allNfts = await getNfts(minterContract, marketplaceContract);
+        if (!allNfts) return;
+        setNfts(allNfts);
+      } catch (error) {
+        console.log({ error });
+      } finally {
+        setLoading(false);
+      }
     }
+
   }, [marketplaceContract, minterContract]);
 
   const addNft = async (data) => {
