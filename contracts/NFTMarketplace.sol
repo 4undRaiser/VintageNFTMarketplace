@@ -63,9 +63,11 @@ function cancelListing(uint256 tokenId) public {
         require(_tokenId > 0 && _tokenId <= listingLength, "item doesn't exist");
         require(msg.value >= listing.price,"not enough balance for this transaction");
         require(!listing.sold, "item is sold already");
+        require(listing.seller != msg.sender, "You cannot buy your own nft");
         payable(listing.seller).transfer(listing.price);
         listing.sold = true;
         listing.nft.transferFrom(address(this), msg.sender, listing.tokenId);
+        listing.seller= msg.sender;
     }
 
 // this function will get the listings in the market place
