@@ -1,11 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Card, Col, Badge, Stack, Row } from "react-bootstrap";
+import { Card, Col, Badge, Stack } from "react-bootstrap";
 import { truncateAddress } from "../../../utils";
 import Identicon from "../../ui/Identicon";
 
-const NftCard = ({ nft, buyNFT, isSold, isOwner }) => {
-  const { owner, price, image, description, name, index, attributes } = nft;
+const NftCard = ({ nft, buyNFT, cancelListing, isSold, isOwner }) => {
+  const { owner, price, image, description, name, index } = nft;
 
   return (
     <Col key={index}>
@@ -32,22 +32,6 @@ const NftCard = ({ nft, buyNFT, isSold, isOwner }) => {
         <Card.Body className="d-flex  flex-column text-center">
           <Card.Title>{name}</Card.Title>
           <Card.Text className="flex-grow-1">{description}</Card.Text>
-          <div>
-            <Row className="mt-2">
-              {attributes.map((attribute, key) => (
-                <Col key={key}>
-                  <div className="border rounded bg-light">
-                    <div className="text-secondary fw-lighter small text-capitalize">
-                      {attribute.trait_type}
-                    </div>
-                    <div className="text-secondary text-capitalize font-monospace">
-                      {attribute.value}
-                    </div>
-                  </div>
-                </Col>
-              ))}
-            </Row>
-          </div>
 
           {isSold ? (
             <div className="d-flex m-2 justify-content-center">
@@ -64,6 +48,22 @@ const NftCard = ({ nft, buyNFT, isSold, isOwner }) => {
               </button>
             </div>
           )}
+
+
+    {isOwner ? (
+            <div className="d-flex m-2 justify-content-center">
+              <button onClick={cancelListing} className="btn btn-primary">
+                Cancel Listing
+              </button>
+            </div>
+          ) : (
+            <div className="d-flex m-2 justify-content-center">
+              <button className="btn btn-danger">
+                Can't Cancel this Listing
+              </button>
+            </div>
+          )}
+
         </Card.Body>
       </Card>
     </Col>

@@ -12,7 +12,7 @@ export const createNft = async (
   minterContract,
   marketplaceContract,
   performActions,
-  { name, price, description, ipfsImage, ownerAddress, attributes }
+  { name, price, description, ipfsImage, ownerAddress }
 ) => {
   await performActions(async (kit) => {
     if (!name || !description || !ipfsImage) return;
@@ -24,7 +24,6 @@ export const createNft = async (
       description,
       image: ipfsImage,
       owner: defaultAccount,
-      attributes,
     });
 
     try {
@@ -83,20 +82,18 @@ export const getNfts = async (minterContract, marketplaceContract) => {
       const nft = new Promise(async (resolve) => {
         const listing = await marketplaceContract.methods.getNFTListing(i).call();
         const res = await minterContract.methods.tokenURI(listing.tokenId).call();
-        const owner = await minterContract.methods.ownerOf(listing.tokenId).call();
         const meta = await fetchNftMeta(res);
         resolve({
           index: i,
-          owner,
           nft: listing.nft,
           price: listing.price,
           seller: listing.seller,
           sold: listing.sold,
           tokenId: listing.tokenId,
+          owner: meta.data.owner,
           name: meta.data.name,
           image: meta.data.image,
           description: meta.data.description,
-          attributes: meta.data.attributes,
         });
       });
       nfts.push(nft);
@@ -153,6 +150,31 @@ export const buyNFT = async (
         await marketplaceContract.methods
           .buyNFT(index)
           .send({ from: defaultAccount, value: listing.price });
+      } catch (error) {
+        console.log({ error });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+  
+
+export const cancelListing = async (
+  minterContract,
+  marketplaceContract,
+  performActions,
+  index,
+) => {
+  try {
+    await performActions(async (kit) => {
+      try {
+        console.log(marketplaceContract, index);
+        const { defaultAccount } = kit;
+
+        await marketplaceContract.methods
+          .cancelListing(index)
+          .send({ from: defaultAccount });
       } catch (error) {
         console.log({ error });
       }

@@ -6,7 +6,7 @@ import AddNfts from "./Add";
 import Nft from "./Card";
 import Loader from "../../ui/Loader";
 import { NotificationSuccess, NotificationError } from "../../ui/Notifications";
-import { getNfts, createNft, buyNFT } from "../../../utils/minter";
+import { getNfts, createNft, buyNFT, cancelListing } from "../../../utils/minter";
 import { Row } from "react-bootstrap";
 
 const NftList = ({ minterContract, marketplaceContract, name }) => {
@@ -69,7 +69,28 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
       getAssets();
     } catch (error) {
       console.log({ error });
-      toast(<NotificationError text="Failed to create an NFT." />);
+      toast(<NotificationError text="Failed to buy an NFT." />);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const cancelNFTListing = async (index) => {
+    try {
+      setLoading(true);
+      await cancelListing(
+        minterContract,
+        marketplaceContract,
+        performActions,
+        index,
+      );
+
+      toast(<NotificationSuccess text="Updating NFT list...." />);
+      getAssets();
+    } catch (error) {
+      console.log({ error });
+      toast(<NotificationError text="Failed to cancel NFT listing." />);
     } finally {
       setLoading(false);
     }
@@ -100,6 +121,7 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
                 <Nft
                   key={_nft.index}
                   buyNFT={() => buy(_nft.index, _nft.tokenId)}
+                  cancelListing={() => cancelNFTListing(_nft.index)}
                   nft={{
                     ..._nft,
                   }}

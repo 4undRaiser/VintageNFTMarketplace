@@ -45,14 +45,15 @@ struct NFTListing {
 function cancelListing(uint256 tokenId) public {
      NFTListing memory listing = _listings[tokenId];
      require(listing.price > 0, "NFTMarket: nft not listed for sale");
-     require(listing.seller == msg.sender, "NFTMarket: you're not the seller");
-     ERC721(address(this)).transferFrom(address(this), msg.sender, tokenId);
+     require(listing.seller == msg.sender, "NFTMarket: cannot cancel listing, you're not the seller");
+     listing.nft.transferFrom(address(this), msg.sender, listing.tokenId);
      clearListing(tokenId);
   }
 // this function will clear the listing by setting the price to zero and the owner address to address(0)
   function clearListing(uint256 tokenID) private {
     _listings[tokenID].price = 0;
     _listings[tokenID].seller= address(0);
+    delete _listings[tokenID];
   }
 
 
