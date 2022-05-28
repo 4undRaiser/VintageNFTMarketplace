@@ -4,4 +4,4 @@ Vintage Marketplace
 
 # Link to Demo on test net
 
-https://dynamic-panda-417267.netlify.app
+https://venerable-daifuku-1d78bf.netlify.app
