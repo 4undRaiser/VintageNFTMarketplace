@@ -61,7 +61,7 @@ const NftCard = ({ nft, buyNFT, cancelListing, isSold, isOwner, isCanceled }) =>
 
     {isOwner ? (
             <div className="d-flex m-2 justify-content-center">
-              <button onClick={()=>handleCancel(index)} className="btn btn-primary">
+              <button onClick={isCanceled === false ? ()=>handleCancel(index) : null} className="btn btn-primary">
                 Cancel Listing
               </button>
             </div>
