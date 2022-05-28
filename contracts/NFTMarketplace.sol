@@ -20,6 +20,7 @@ struct NFTListing {
   address seller;
   bool sold;
   uint256 tokenId;
+  bool canceled;
 }
   
  
@@ -36,24 +37,19 @@ struct NFTListing {
        _price,
        payable(msg.sender), 
        false, 
-       _tokenId
+       _tokenId,
+       false
        );
   }
 
 
-//this function will cancel the listing. it also has checks to make sure only the owner of the listing can cancel the listing from the market place
+// this function will cancel the listing. it also has checks to make sure only the owner of the listing can cancel the listing from the market place
 function cancelListing(uint256 tokenId) public {
-     NFTListing memory listing = _listings[tokenId];
+     NFTListing storage listing = _listings[tokenId];
      require(listing.price > 0, "NFTMarket: nft not listed for sale");
      require(listing.seller == msg.sender, "NFTMarket: cannot cancel listing, you're not the seller");
-     listing.nft.transferFrom(address(this), msg.sender, listing.tokenId);
-     clearListing(tokenId);
-  }
-// this function will clear the listing by setting the price to zero and the owner address to address(0)
-  function clearListing(uint256 tokenID) private {
-    _listings[tokenID].price = 0;
-    _listings[tokenID].seller= address(0);
-    delete _listings[tokenID];
+     IERC721(listing.nft).transferFrom(address(this), msg.sender, listing.tokenId);
+     listing.canceled = true;
   }
 
 
@@ -64,6 +60,7 @@ function cancelListing(uint256 tokenId) public {
         require(_tokenId > 0 && _tokenId <= listingLength, "item doesn't exist");
         require(msg.value >= listing.price,"not enough balance for this transaction");
         require(!listing.sold, "item is sold already");
+        require(!listing.canceled == false, "item is canceled already");  // check if the item has been canceled
         require(listing.seller != msg.sender, "You cannot buy your own nft");
         payable(listing.seller).transfer(listing.price);
         listing.sold = true;

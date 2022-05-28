@@ -4,8 +4,15 @@ import { Card, Col, Badge, Stack } from "react-bootstrap";
 import { truncateAddress } from "../../../utils";
 import Identicon from "../../ui/Identicon";
 
-const NftCard = ({ nft, buyNFT, cancelListing, isSold, isOwner }) => {
+const NftCard = ({ nft, buyNFT, cancelListing, isSold, isOwner, isCanceled }) => {
   const { owner, price, image, description, name, index } = nft;
+
+
+
+  const handleCancel = (index)=>{
+    cancelListing(index);
+}
+
 
   return (
     <Col key={index}>
@@ -33,7 +40,8 @@ const NftCard = ({ nft, buyNFT, cancelListing, isSold, isOwner }) => {
           <Card.Title>{name}</Card.Title>
           <Card.Text className="flex-grow-1">{description}</Card.Text>
 
-          {isSold ? (
+      
+         {isSold ? (
             <div className="d-flex m-2 justify-content-center">
               <button
                 className={`btn ${isOwner ? "btn-danger" : "btn-secondary"}`}
@@ -42,17 +50,18 @@ const NftCard = ({ nft, buyNFT, cancelListing, isSold, isOwner }) => {
               </button>
             </div>
           ) : (
+         
             <div className="d-flex m-2 justify-content-center">
-              <button onClick={buyNFT} className="btn btn-primary">
-                Buy
-              </button>
-            </div>
-          )}
-
+            <button onClick={isCanceled === false ? buyNFT : null}className="btn btn-primary">
+            {isCanceled ?  "Listing Canceled": "Buy"}
+            </button>
+          </div>    
+           )}
+      
 
     {isOwner ? (
             <div className="d-flex m-2 justify-content-center">
-              <button onClick={cancelListing} className="btn btn-primary">
+              <button onClick={()=>handleCancel(index)} className="btn btn-primary">
                 Cancel Listing
               </button>
             </div>

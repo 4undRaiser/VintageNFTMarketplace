@@ -17,7 +17,8 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const getAssets = useCallback(async () => {
+  const getAssets = useCallback( async () => {
+
     try {
       setLoading(true);
 
@@ -121,12 +122,13 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
                 <Nft
                   key={_nft.index}
                   buyNFT={() => buy(_nft.index, _nft.tokenId)}
-                  cancelListing={() => cancelNFTListing(_nft.index)}
+                  cancelListing={cancelNFTListing}
                   nft={{
                     ..._nft,
                   }}
                   isOwner={_nft.owner === address}
                   isSold={_nft.sold}
+                  isCanceled={_nft.canceled}
                 />
               ))}
             </Row>

@@ -90,6 +90,7 @@ export const getNfts = async (minterContract, marketplaceContract) => {
           seller: listing.seller,
           sold: listing.sold,
           tokenId: listing.tokenId,
+          canceled: listing.canceled,
           owner: meta.data.owner,
           name: meta.data.name,
           image: meta.data.image,
@@ -171,7 +172,6 @@ export const cancelListing = async (
       try {
         console.log(marketplaceContract, index);
         const { defaultAccount } = kit;
-
         await marketplaceContract.methods
           .cancelListing(index)
           .send({ from: defaultAccount });
