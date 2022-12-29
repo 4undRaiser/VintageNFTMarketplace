@@ -1,11 +1,26 @@
-import { create as ipfsHttpClient } from "ipfs-http-client";
 import axios from "axios";
 import MyNFTContractAddress from "../contracts/MyNFT-address.json";
 import NFTMarketplaceContractAddress from "../contracts/NFTMarketplace-address.json";
 import { BigNumber, ethers } from "ethers";
+import { Web3Storage } from 'web3.storage/dist/bundle.esm.min.js';
 
-// initialize IPFS
-const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
+const getAccessToken = () => { return process.env.REACT_APP_STORAGE_API_KEY }
+  const makeStorageClient = () => { return new Web3Storage({ token: getAccessToken() }) }
+  
+
+  const upload = (file) => {
+    const client = makeStorageClient();
+    const file_cid = client.put(file);
+    return file_cid;
+  }
+  
+  const makeFileObjects = (file, file_name) => {
+    const blob = new Blob([JSON.stringify(file)], { type: "application/json" })
+    const files = [new File([blob], `${file_name}.json`)]
+  
+    return files
+  }
+
 
 // mint an NFT
 export const createNft = async (
@@ -28,10 +43,11 @@ export const createNft = async (
 
     try {
       // save NFT metadata to IPFS
-      const added = await client.add(data);
+      const files = makeFileObjects(data, name);
+      const file_cid = await upload(files);
 
       // IPFS url for uploaded metadata
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`;
+      const url = `https://${file_cid}.ipfs.w3s.link/${name}.json`;
 
       // mint the NFT and save the IPFS url to the blockchain
       let transaction = await minterContract.methods
@@ -60,16 +76,15 @@ export const createNft = async (
 
 // function to upload a file to IPFS
 export const uploadToIpfs = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  try {
-    const added = await client.add(file, {
-      progress: (prog) => console.log(`received: ${prog}`),
-    });
-    return `https://ipfs.infura.io/ipfs/${added.path}`;
-  } catch (error) {
-    console.log("Error uploading file: ", error);
-  }
+  const image = e.target.files;
+  const image_name = image[0].name;
+
+  if (!image) return;
+  // Pack files into a CAR and send to web3.storage
+  const cid = await upload(image) // Promise<CIDString>
+  const image_url = `https://${cid}.ipfs.w3s.link/${image_name}`
+
+  return image_url;
 };
 
 // fetch all NFTs on the smart contract
@@ -91,10 +106,10 @@ export const getNfts = async (minterContract, marketplaceContract) => {
           sold: listing.sold,
           tokenId: listing.tokenId,
           canceled: listing.canceled,
-          owner: meta.data.owner,
-          name: meta.data.name,
-          image: meta.data.image,
-          description: meta.data.description,
+          owner: meta.owner,
+          name: meta.name,
+          image: meta.image,
+          description: meta.description,
         });
       });
       nfts.push(nft);
@@ -110,10 +125,11 @@ export const fetchNftMeta = async (ipfsUrl) => {
   try {
     if (!ipfsUrl) return null;
     const meta = await axios.get(ipfsUrl);
-    return meta;
-  } catch (e) {
-    console.log({ e });
-  }
+    const data = JSON.parse(meta.data)
+    return data;
+} catch (e) {
+    console.log({e});
+}
 };
 
 // get the owner address of an NFT
