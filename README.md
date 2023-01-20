@@ -1,7 +1,7 @@
 # VintageNFTMarketplace
 
-Vintage Marketplace
+Vintage Marketplace built on the celo block-chain
 
 # Link to Demo on test net
 
-https://venerable-daifuku-1d78bf.netlify.app
+https://exquisite-cupcake-9eead6.netlify.app
