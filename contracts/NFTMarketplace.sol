@@ -1,81 +1,92 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 
 
 contract NFTMarketplace {
-  
-    using SafeMath for uint256;
-    uint256 public listingLength = 0;
+    using Counters for Counters.Counter;
+    
+    Counters.Counter private numOfListing;
 
 struct NFTListing {  
-  IERC721 nft;
-  uint256 price;
+  ERC721 nft;
+  uint tokenId;
+  uint price;
   address seller;
-  bool sold;
-  uint256 tokenId;
-  bool canceled;
+  bool forSale;
 }
   
  
-  mapping(uint256 => NFTListing) public _listings;
+  mapping(uint256 => NFTListing) public listings;
+
+   
+   modifier onlyNftOwner(uint _Id) {
+        require(msg.sender == listings[_Id].seller);
+        _;
+    }
+
 
   
 // this function will list an artifact into the marketplace
-  function listNFT(IERC721 _nft,  uint256 _price, uint256 _tokenId) external {
+  function listNFT(ERC721 _nft,  uint256 _tokenId, uint256 _price) external {
     require(_price > 0, "NFTMarket: price must be greater than 0");
-      listingLength ++;
-    _nft.transferFrom(msg.sender, address(this), _tokenId);
-    _listings[listingLength] = NFTListing(
-      _nft,
+    numOfListing.increment();
+    listings[numOfListing.current()] = NFTListing(
+       _nft,
+       _tokenId,
        _price,
        payable(msg.sender), 
-       false, 
-       _tokenId,
        false
        );
   }
 
 
 // this function will cancel the listing. it also has checks to make sure only the owner of the listing can cancel the listing from the market place
-function cancelListing(uint256 tokenId) public {
-     NFTListing storage listing = _listings[tokenId];
-     require(listing.price > 0, "NFTMarket: nft not listed for sale");
-     require(listing.seller == msg.sender, "NFTMarket: cannot cancel listing, you're not the seller");
-     IERC721(listing.nft).transferFrom(address(this), msg.sender, listing.tokenId);
-     listing.canceled = true;
+function sell(uint256 _Id) external onlyNftOwner(_Id){
+     NFTListing storage listing = listings[_Id];
+     require(listing.seller == msg.sender, "Only the nft owner can sell nft");
+     require(listing.forSale == false);
+     listing.nft.transferFrom(msg.sender, address(this), _Id);
+     listing.forSale = true;
+  }
+
+
+  function cancel(uint _Id) external onlyNftOwner(_Id){
+     NFTListing storage listing = listings[_Id];
+     require(listing.seller == msg.sender);
+     require(listing.forSale == true);
+     listing.nft.transferFrom(address(this), msg.sender, _Id);
+     listing.forSale = false;
   }
 
 
 
 // this function will facilitate the purchasing of a listing
-  function buyNFT(uint256 _tokenId) external payable {
-        NFTListing storage listing = _listings[_tokenId];
-        require(_tokenId > 0 && _tokenId <= listingLength, "item doesn't exist");
+  function buyNFT(uint _Id) external payable {
+        NFTListing storage listing = listings[_Id];
+        require(_Id > 0 && _Id <= numOfListing.current(), "item doesn't exist");
         require(msg.value >= listing.price,"not enough balance for this transaction");
-        require(!listing.sold, "item is sold already");
-        require(!listing.canceled == false, "item is canceled already");  // check if the item has been canceled
+        require(listing.forSale != false, "item is not for sell");
         require(listing.seller != msg.sender, "You cannot buy your own nft");
         payable(listing.seller).transfer(listing.price);
-        listing.sold = true;
         listing.nft.transferFrom(address(this), msg.sender, listing.tokenId);
-        listing.seller= msg.sender;
+        listing.seller = msg.sender;
+        listing.forSale = false;
     }
 
 // this function will get the listings in the market place
-    function getNFTListing(uint256 _tokenId) public view returns (NFTListing memory) {
-        return _listings[_tokenId];
+    function getNFTListing(uint _Id) public view returns (NFTListing memory) {
+        return listings[_Id];
     }
 
     
     // get list of items
-    function getListinglength() public view returns (uint256) {
-        return listingLength;
+    function getListinglength() public view returns (uint) {
+        return numOfListing.current();
     }
+
+    
 }

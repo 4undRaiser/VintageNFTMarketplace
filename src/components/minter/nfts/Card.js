@@ -4,14 +4,8 @@ import { Card, Col, Badge, Stack } from "react-bootstrap";
 import { truncateAddress } from "../../../utils";
 import Identicon from "../../ui/Identicon";
 
-const NftCard = ({ nft, buyNFT, cancelListing, isSold, isOwner, isCanceled }) => {
-  const { owner, price, image, description, name, index } = nft;
-
-
-
-  const handleCancel = (index)=>{
-    cancelListing(index);
-}
+const NftCard = ({ nft, buyNFT, cancelNFT, sellNFT, isOwner }) => {
+  const { index, tokenId, price, seller, forSale, owner, name, image, description } = nft;
 
 
   return (
@@ -41,37 +35,35 @@ const NftCard = ({ nft, buyNFT, cancelListing, isSold, isOwner, isCanceled }) =>
           <Card.Text className="flex-grow-1">{description}</Card.Text>
 
       
-         {isSold ? (
+         {forSale === true && isOwner === false && (
+        
             <div className="d-flex m-2 justify-content-center">
-              <button
-                className={`btn ${isOwner ? "btn-danger" : "btn-secondary"}`}
-              >
-                {isOwner ? "Bought" : "Sold"}
-              </button>
-            </div>
-          ) : (
-         
-            <div className="d-flex m-2 justify-content-center">
-            <button onClick={isCanceled === false ? buyNFT : null}className="btn btn-primary">
-            {isCanceled ?  "Listing Canceled": "Buy"}
+            <button className="btn btn-primary" onClick={() => buyNFT(tokenId)}>
+              Buy Nft
             </button>
-          </div>    
+          </div> 
+            
            )}
-      
 
-    {isOwner ? (
-            <div className="d-flex m-2 justify-content-center">
-              <button onClick={isCanceled === false ? ()=>handleCancel(index) : null} className="btn btn-primary">
-                Cancel Listing
-              </button>
-            </div>
-          ) : (
-            <div className="d-flex m-2 justify-content-center">
-              <button className="btn btn-danger">
-                Can't Cancel this Listing
-              </button>
-            </div>
-          )}
+         {forSale === false && isOwner === true && (
+        
+        <div className="d-flex m-2 justify-content-center">
+        <button className="btn btn-primary" onClick={() => sellNFT(tokenId)}>
+          Sell
+        </button>
+      </div> 
+        
+       )}
+
+       {forSale === true && isOwner === true && (
+        
+        <div className="d-flex m-2 justify-content-center">
+        <button className="btn btn-primary" onClick={() => cancelNFT(tokenId)}>
+          Cancel Sale
+        </button>
+      </div> 
+        
+       )}
 
         </Card.Body>
       </Card>

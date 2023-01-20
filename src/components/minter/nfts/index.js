@@ -6,7 +6,7 @@ import AddNfts from "./Add";
 import Nft from "./Card";
 import Loader from "../../ui/Loader";
 import { NotificationSuccess, NotificationError } from "../../ui/Notifications";
-import { getNfts, createNft, buyNFT, cancelListing } from "../../../utils/minter";
+import { getNfts, createNft, buyNFT, cancel, sell } from "../../../utils/minter";
 import { Row } from "react-bootstrap";
 
 const NftList = ({ minterContract, marketplaceContract, name }) => {
@@ -54,46 +54,66 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
     }
   };
 
-  const buy = async (index, tokenId) => {
+  const buy = async (tokenId) => {
     try {
       setLoading(true);
 
       await buyNFT(
-        minterContract,
         marketplaceContract,
         performActions,
-        index,
         tokenId
       );
 
       toast(<NotificationSuccess text="Updating NFT list...." />);
-      getAssets();
+      
     } catch (error) {
       console.log({ error });
       toast(<NotificationError text="Failed to buy an NFT." />);
     } finally {
       setLoading(false);
+      getAssets();
     }
   };
 
 
-  const cancelNFTListing = async (index) => {
+  const sellNFT = async (tokenId) => {
     try {
       setLoading(true);
-      await cancelListing(
-        minterContract,
+      await sell(
         marketplaceContract,
         performActions,
-        index,
+        tokenId
       );
 
-      toast(<NotificationSuccess text="Updating NFT list...." />);
-      getAssets();
+      toast(<NotificationSuccess text="Selling NFT...." />);
+      
     } catch (error) {
       console.log({ error });
-      toast(<NotificationError text="Failed to cancel NFT listing." />);
+      toast(<NotificationError text="Failed to sell NFT....." />);
     } finally {
       setLoading(false);
+      getAssets();
+    }
+  };
+
+
+  const cancelNFT = async (tokenId) => {
+    try {
+      setLoading(true);
+      await cancel(
+        marketplaceContract,
+        performActions,
+        tokenId
+      );
+
+      toast(<NotificationSuccess text="Canceling sale ...." />);
+      
+    } catch (error) {
+      console.log({ error });
+      toast(<NotificationError text="Failed to cancel sale....." />);
+    } finally {
+      setLoading(false);
+      getAssets();
     }
   };
 
@@ -122,13 +142,12 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
                 <Nft
                   key={_nft.index}
                   buyNFT={() => buy(_nft.index, _nft.tokenId)}
-                  cancelListing={cancelNFTListing}
+                  cancelNFT={cancelNFT}
+                  sellNFT={sellNFT}
                   nft={{
                     ..._nft,
                   }}
-                  isOwner={_nft.owner === address}
-                  isSold={_nft.sold}
-                  isCanceled={_nft.canceled}
+                  isOwner={_nft.seller === address}
                 />
               ))}
             </Row>

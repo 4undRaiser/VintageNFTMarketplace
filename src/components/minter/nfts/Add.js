@@ -83,9 +83,8 @@ const AddNfts = ({ save, address }) => {
               className="mb-3"
             >
               <Form.Control
-                as="textarea"
+                type="number"
                 placeholder="Price"
-                style={{ height: "80px" }}
                 onChange={(e) => {
                   setPrice(e.target.value);
                 }}

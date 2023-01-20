@@ -4,6 +4,8 @@ import NFTMarketplaceContractAddress from "../contracts/NFTMarketplace-address.j
 import { BigNumber, ethers } from "ethers";
 import { Web3Storage } from 'web3.storage/dist/bundle.esm.min.js';
 
+
+
 const getAccessToken = () => { return process.env.REACT_APP_STORAGE_API_KEY }
   const makeStorageClient = () => { return new Web3Storage({ token: getAccessToken() }) }
   
@@ -64,7 +66,7 @@ export const createNft = async (
         .send({ from: kit.defaultAccount });
 
       await marketplaceContract.methods
-        .listNFT(MyNFTContractAddress.MyNFT, NFTprice, tokenCount)
+        .listNFT(MyNFTContractAddress.MyNFT, tokenCount, NFTprice)
         .send({ from: defaultAccount });
 
       return transaction;
@@ -96,16 +98,15 @@ export const getNfts = async (minterContract, marketplaceContract) => {
     for (let i = 1; i <= Number(nftsLength); i++) {
       const nft = new Promise(async (resolve) => {
         const listing = await marketplaceContract.methods.getNFTListing(i).call();
-        const res = await minterContract.methods.tokenURI(listing.tokenId).call();
+        const res = await minterContract.methods.tokenURI(i).call();
         const meta = await fetchNftMeta(res);
         resolve({
           index: i,
           nft: listing.nft,
+          tokenId: listing.tokenId,
           price: listing.price,
           seller: listing.seller,
-          sold: listing.sold,
-          tokenId: listing.tokenId,
-          canceled: listing.canceled,
+          forSale: listing.forSale,
           owner: meta.owner,
           name: meta.name,
           image: meta.image,
@@ -152,20 +153,18 @@ export const fetchNftContractOwner = async (minterContract) => {
 };
 
 export const buyNFT = async (
-  minterContract,
   marketplaceContract,
   performActions,
-  index,
   tokenId
 ) => {
   try {
     await performActions(async (kit) => {
       try {
-        console.log(marketplaceContract, index);
+        console.log(marketplaceContract, tokenId);
         const { defaultAccount } = kit;
-        const listing = await marketplaceContract.methods.getNFTListing(index).call();
+        const listing = await marketplaceContract.methods.getNFTListing(tokenId).call();
         await marketplaceContract.methods
-          .buyNFT(index)
+          .buyNFT(tokenId)
           .send({ from: defaultAccount, value: listing.price });
       } catch (error) {
         console.log({ error });
@@ -177,19 +176,17 @@ export const buyNFT = async (
 };
   
 
-export const cancelListing = async (
-  minterContract,
+export const sell = async (
   marketplaceContract,
   performActions,
-  index,
+  tokenId,
 ) => {
   try {
     await performActions(async (kit) => {
       try {
-        console.log(marketplaceContract, index);
         const { defaultAccount } = kit;
         await marketplaceContract.methods
-          .cancelListing(index)
+          .sell(tokenId)
           .send({ from: defaultAccount });
       } catch (error) {
         console.log({ error });
@@ -199,4 +196,31 @@ export const cancelListing = async (
     console.log(error);
   }
 };
+
+
+export const cancel = async (
+  marketplaceContract,
+  performActions,
+  tokenId,
+) => {
+  try {
+    await performActions(async (kit) => {
+      try {
+        const { defaultAccount } = kit;
+        await marketplaceContract.methods
+          .cancel(tokenId)
+          .send({ from: defaultAccount });
+      } catch (error) {
+        console.log({ error });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+
+
+
   
