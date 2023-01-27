@@ -6,7 +6,13 @@ import AddNfts from "./Add";
 import Nft from "./Card";
 import Loader from "../../ui/Loader";
 import { NotificationSuccess, NotificationError } from "../../ui/Notifications";
-import { getNfts, createNft, buyNFT, cancel, sell } from "../../../utils/minter";
+import {
+  getNfts,
+  createNft,
+  buyNFT,
+  cancel,
+  sell,
+} from "../../../utils/minter";
 import { Row } from "react-bootstrap";
 
 const NftList = ({ minterContract, marketplaceContract, name }) => {
@@ -17,8 +23,7 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const getAssets = useCallback( async () => {
-
+  const getAssets = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -58,14 +63,9 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
     try {
       setLoading(true);
 
-      await buyNFT(
-        marketplaceContract,
-        performActions,
-        tokenId
-      );
+      await buyNFT(marketplaceContract, performActions, tokenId);
 
       toast(<NotificationSuccess text="Updating NFT list...." />);
-      
     } catch (error) {
       console.log({ error });
       toast(<NotificationError text="Failed to buy an NFT." />);
@@ -75,18 +75,12 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
     }
   };
 
-
   const sellNFT = async (tokenId) => {
     try {
       setLoading(true);
-      await sell(
-        marketplaceContract,
-        performActions,
-        tokenId
-      );
+      await sell(marketplaceContract, performActions, tokenId);
 
       toast(<NotificationSuccess text="Selling NFT...." />);
-      
     } catch (error) {
       console.log({ error });
       toast(<NotificationError text="Failed to sell NFT....." />);
@@ -96,18 +90,12 @@ const NftList = ({ minterContract, marketplaceContract, name }) => {
     }
   };
 
-
   const cancelNFT = async (tokenId) => {
     try {
       setLoading(true);
-      await cancel(
-        marketplaceContract,
-        performActions,
-        tokenId
-      );
+      await cancel(marketplaceContract, performActions, tokenId);
 
       toast(<NotificationSuccess text="Canceling sale ...." />);
-      
     } catch (error) {
       console.log({ error });
       toast(<NotificationError text="Failed to cancel sale....." />);

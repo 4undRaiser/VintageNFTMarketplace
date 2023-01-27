@@ -39,7 +39,6 @@ function storeContractData(contract) {
   );
 }
 
-
 function storemarketplaceData(contract) {
   const fs = require("fs");
   const contractsDir = __dirname + "/../src/contracts";

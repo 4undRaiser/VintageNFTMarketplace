@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useContractKit } from '@celo-tools/use-contractkit';
+import { useState, useEffect, useCallback } from "react";
+import { useContractKit } from "@celo-tools/use-contractkit";
 
 export const useContract = (abi, contractAddress) => {
   const { getConnectedKit, address } = useContractKit();

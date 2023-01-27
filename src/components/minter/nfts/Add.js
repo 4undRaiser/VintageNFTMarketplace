@@ -5,7 +5,6 @@ import { uploadToIpfs } from "../../../utils/minter";
 
 // basic attributes that can be added to NFT
 
-
 const AddNfts = ({ save, address }) => {
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0);
@@ -13,22 +12,17 @@ const AddNfts = ({ save, address }) => {
   const [description, setDescription] = useState("");
   const [show, setShow] = useState(false);
 
-
-
   // check if all form data has been filled
-  const isFormFilled = () =>
-      name && ipfsImage && description;
+  const isFormFilled = () => name && ipfsImage && description;
 
   // close the popup modal
   const handleClose = () => {
     setShow(false);
-   
   };
 
   // display the popup modal
   const handleShow = () => setShow(true);
 
-  
   return (
     <>
       <Button
@@ -121,7 +115,6 @@ const AddNfts = ({ save, address }) => {
                 ipfsImage,
                 description,
                 ownerAddress: address,
-
               });
               handleClose();
             }}
@@ -135,7 +128,6 @@ const AddNfts = ({ save, address }) => {
 };
 
 AddNfts.propTypes = {
-
   // props passed into this component
   save: PropTypes.func.isRequired,
   address: PropTypes.string.isRequired,

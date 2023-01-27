@@ -2,27 +2,27 @@ import axios from "axios";
 import MyNFTContractAddress from "../contracts/MyNFT-address.json";
 import NFTMarketplaceContractAddress from "../contracts/NFTMarketplace-address.json";
 import { BigNumber, ethers } from "ethers";
-import { Web3Storage } from 'web3.storage/dist/bundle.esm.min.js';
+import { Web3Storage } from "web3.storage/dist/bundle.esm.min.js";
 
+const getAccessToken = () => {
+  return process.env.REACT_APP_STORAGE_API_KEY;
+};
+const makeStorageClient = () => {
+  return new Web3Storage({ token: getAccessToken() });
+};
 
+const upload = (file) => {
+  const client = makeStorageClient();
+  const file_cid = client.put(file);
+  return file_cid;
+};
 
-const getAccessToken = () => { return process.env.REACT_APP_STORAGE_API_KEY }
-  const makeStorageClient = () => { return new Web3Storage({ token: getAccessToken() }) }
-  
+const makeFileObjects = (file, file_name) => {
+  const blob = new Blob([JSON.stringify(file)], { type: "application/json" });
+  const files = [new File([blob], `${file_name}.json`)];
 
-  const upload = (file) => {
-    const client = makeStorageClient();
-    const file_cid = client.put(file);
-    return file_cid;
-  }
-  
-  const makeFileObjects = (file, file_name) => {
-    const blob = new Blob([JSON.stringify(file)], { type: "application/json" })
-    const files = [new File([blob], `${file_name}.json`)]
-  
-    return files
-  }
-
+  return files;
+};
 
 // mint an NFT
 export const createNft = async (
@@ -56,7 +56,9 @@ export const createNft = async (
         .createNFT(url)
         .send({ from: defaultAccount });
 
-      let tokenCount = BigNumber.from(transaction.events.Transfer.returnValues.tokenId);
+      let tokenCount = BigNumber.from(
+        transaction.events.Transfer.returnValues.tokenId
+      );
 
       const NFTprice = ethers.utils.parseUnits(String(price), "ether");
       console.log(NFTprice);
@@ -83,8 +85,8 @@ export const uploadToIpfs = async (e) => {
 
   if (!image) return;
   // Pack files into a CAR and send to web3.storage
-  const cid = await upload(image) // Promise<CIDString>
-  const image_url = `https://${cid}.ipfs.w3s.link/${image_name}`
+  const cid = await upload(image); // Promise<CIDString>
+  const image_url = `https://${cid}.ipfs.w3s.link/${image_name}`;
 
   return image_url;
 };
@@ -93,11 +95,15 @@ export const uploadToIpfs = async (e) => {
 export const getNfts = async (minterContract, marketplaceContract) => {
   try {
     const nfts = [];
-    const nftsLength = await marketplaceContract.methods.getListinglength().call();
+    const nftsLength = await marketplaceContract.methods
+      .getListinglength()
+      .call();
     // contract starts minting from index 1
     for (let i = 1; i <= Number(nftsLength); i++) {
       const nft = new Promise(async (resolve) => {
-        const listing = await marketplaceContract.methods.getNFTListing(i).call();
+        const listing = await marketplaceContract.methods
+          .getNFTListing(i)
+          .call();
         const res = await minterContract.methods.tokenURI(i).call();
         const meta = await fetchNftMeta(res);
         resolve({
@@ -126,11 +132,11 @@ export const fetchNftMeta = async (ipfsUrl) => {
   try {
     if (!ipfsUrl) return null;
     const meta = await axios.get(ipfsUrl);
-    const data = JSON.parse(meta.data)
+    const data = JSON.parse(meta.data);
     return data;
-} catch (e) {
-    console.log({e});
-}
+  } catch (e) {
+    console.log({ e });
+  }
 };
 
 // get the owner address of an NFT
@@ -152,17 +158,15 @@ export const fetchNftContractOwner = async (minterContract) => {
   }
 };
 
-export const buyNFT = async (
-  marketplaceContract,
-  performActions,
-  tokenId
-) => {
+export const buyNFT = async (marketplaceContract, performActions, tokenId) => {
   try {
     await performActions(async (kit) => {
       try {
         console.log(marketplaceContract, tokenId);
         const { defaultAccount } = kit;
-        const listing = await marketplaceContract.methods.getNFTListing(tokenId).call();
+        const listing = await marketplaceContract.methods
+          .getNFTListing(tokenId)
+          .call();
         await marketplaceContract.methods
           .buyNFT(tokenId)
           .send({ from: defaultAccount, value: listing.price });
@@ -174,13 +178,8 @@ export const buyNFT = async (
     console.log(error);
   }
 };
-  
 
-export const sell = async (
-  marketplaceContract,
-  performActions,
-  tokenId,
-) => {
+export const sell = async (marketplaceContract, performActions, tokenId) => {
   try {
     await performActions(async (kit) => {
       try {
@@ -197,12 +196,7 @@ export const sell = async (
   }
 };
 
-
-export const cancel = async (
-  marketplaceContract,
-  performActions,
-  tokenId,
-) => {
+export const cancel = async (marketplaceContract, performActions, tokenId) => {
   try {
     await performActions(async (kit) => {
       try {
@@ -218,9 +212,3 @@ export const cancel = async (
     console.log(error);
   }
 };
-
-
-
-
-
-  
